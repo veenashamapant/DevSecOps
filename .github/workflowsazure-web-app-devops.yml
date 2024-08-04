@@ -38,7 +38,7 @@ jobs:
                 pip_path = 'venv/bin/pip'
             
             # Install dependencies
-            subprocess.check_call([pip_path, 'install', '-r', 'requirements.txt'])
+              pip install -r requirements.txt
 
         if __name__ == "__main__":
             create_venv_and_install()
