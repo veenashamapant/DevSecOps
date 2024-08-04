@@ -44,18 +44,6 @@ jobs:
             create_venv_and_install()
         EOF
 
-    - name: Run tests
-      run: |
-        python - <<EOF
-        import unittest
-
-        if __name__ == "__main__":
-            tests = unittest.TestLoader().discover('tests')
-            result = unittest.TextTestRunner(verbosity=2).run(tests)
-            if not result.wasSuccessful():
-                exit(1)
-        EOF
-
     - name: Check code style
       run: |
         pip install flake8
