@@ -1,10 +1,5 @@
 name: Deploy Python API to Azure Web App
 
-env:
-  AZURE_WEBAPP_NAME: my-simple-flask-api-one
-  # Replace with your app name
-  PYTHON_VERSION: '3.8'
-
 on:
   push:
     branches:
@@ -13,6 +8,9 @@ on:
 jobs:
   build-test-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      AZURE_WEBAPP_NAME: my-simple-flask-api-one  # Replace with your app name
+      PYTHON_VERSION: '3.8'
     steps:
     - uses: actions/checkout@v4
     
@@ -38,10 +36,22 @@ jobs:
                 pip_path = 'venv/bin/pip'
             
             # Install dependencies
-              pip install -r requirements.txt
+            subprocess.check_call([pip_path, 'install', '-r', 'requirements.txt'])
 
         if __name__ == "__main__":
             create_venv_and_install()
+        EOF
+
+    - name: Run tests
+      run: |
+        python - <<EOF
+        import unittest
+
+        if __name__ == "__main__":
+            tests = unittest.TestLoader().discover('tests')
+            result = unittest.TextTestRunner(verbosity=2).run(tests)
+            if not result.wasSuccessful():
+                exit(1)
         EOF
 
     - name: Check code style
@@ -63,24 +73,8 @@ jobs:
             check_style()
         EOF
 
-    - name: Run application (for testing)
-      run: |
-        python - <<EOF
-        import subprocess
-        import time
-
-        def run_app():
-            process = subprocess.Popen(['python', 'main.py'])
-            time.sleep(5)  # Give the app some time to start
-            process.terminate()
-
-        if __name__ == "__main__":
-            run_app()
-        EOF
-
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        
